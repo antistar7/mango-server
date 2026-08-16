@@ -1,0 +1,20 @@
+services:
+  mariadb:
+    image: mariadb:11.8
+    container_name: mango-mariadb
+    restart: unless-stopped
+
+    environment:
+      MARIADB_ROOT_PASSWORD: mango_root
+      MARIADB_DATABASE: mango
+      MARIADB_USER: mango
+      MARIADB_PASSWORD: mango_pass
+
+    ports:
+      - "3307:3306"
+
+    volumes:
+      - mango-mariadb-data:/var/lib/mysql
+
+volumes:
+  mango-mariadb-data:
