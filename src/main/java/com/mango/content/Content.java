@@ -16,7 +16,7 @@ public class Content {
     @Column(nullable = false, length = 100)
     private String japanese;
 
-    @Column(nullable = false, length = 500)
+    @Column(length = 500)
     private String description;
 
     protected Content() {
@@ -44,11 +44,7 @@ public class Content {
         return description;
     }
 
-    public void update(
-            String korean,
-            String japanese,
-            String description
-    ) {
+    public void update(String korean, String japanese, String description) {
         this.korean = korean;
         this.japanese = japanese;
         this.description = description;
