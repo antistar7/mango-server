@@ -2,6 +2,7 @@ package com.mango.content;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
 
 public class ContentRequest {
 
@@ -16,6 +17,9 @@ public class ContentRequest {
     @Size(max = 500, message = "description은 500자 이하여야 합니다.")
     private String description;
 
+    @NotNull(message = "subCategoryId는 필수입니다.")
+    private Long subCategoryId;
+
     public String getKorean() {
         return korean;
     }
@@ -26,5 +30,9 @@ public class ContentRequest {
 
     public String getDescription() {
         return description;
+    }
+
+    public Long getSubCategoryId() {
+        return subCategoryId;
     }
 }

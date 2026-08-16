@@ -1,5 +1,6 @@
 package com.mango.content;
 
+import com.mango.category.SubCategory;
 import jakarta.persistence.*;
 
 @Entity
@@ -19,14 +20,25 @@ public class Content {
     @Column(length = 500)
     private String description;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sub_category_id")
+    private SubCategory subCategory;
+
     protected Content() {
     }
 
-    public Content(String korean, String japanese, String description) {
+    public Content(
+            String korean,
+            String japanese,
+            String description,
+            SubCategory subCategory
+    ) {
         this.korean = korean;
         this.japanese = japanese;
         this.description = description;
+        this.subCategory = subCategory;
     }
+
 
     public Long getId() {
         return id;
@@ -44,9 +56,19 @@ public class Content {
         return description;
     }
 
-    public void update(String korean, String japanese, String description) {
+    public SubCategory getSubCategory() {
+        return subCategory;
+    }
+
+    public void update(
+            String korean,
+            String japanese,
+            String description,
+            SubCategory subCategory
+    ) {
         this.korean = korean;
         this.japanese = japanese;
         this.description = description;
+        this.subCategory = subCategory;
     }
 }
