@@ -1,38 +1,81 @@
 package com.mango.content;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import jakarta.validation.constraints.NotNull;
-
 public class ContentRequest {
 
-    @NotBlank(message = "korean은 필수입니다.")
-    @Size(max = 100, message = "korean은 100자 이하여야 합니다.")
-    private String korean;
+    private String sourceLanguage;
+    private String targetLanguage;
 
-    @NotBlank(message = "japanese는 필수입니다.")
-    @Size(max = 100, message = "japanese는 100자 이하여야 합니다.")
-    private String japanese;
+    private String sourceText;
+    private String targetText;
 
-    @Size(max = 500, message = "description은 500자 이하여야 합니다.")
     private String description;
 
-    @NotNull(message = "subCategoryId는 필수입니다.")
+    private Integer difficulty;
+    private Integer sortOrder;
+
     private Long subCategoryId;
 
-    public String getKorean() {
-        return korean;
+    public String getSourceLanguage() {
+        return sourceLanguage;
     }
 
-    public String getJapanese() {
-        return japanese;
+    public void setSourceLanguage(String sourceLanguage) {
+        this.sourceLanguage = sourceLanguage;
+    }
+
+    public String getTargetLanguage() {
+        return targetLanguage;
+    }
+
+    public void setTargetLanguage(String targetLanguage) {
+        this.targetLanguage = targetLanguage;
+    }
+
+    public String getSourceText() {
+        return sourceText;
+    }
+
+    public void setSourceText(String sourceText) {
+        this.sourceText = sourceText;
+    }
+
+    public String getTargetText() {
+        return targetText;
+    }
+
+    public void setTargetText(String targetText) {
+        this.targetText = targetText;
     }
 
     public String getDescription() {
         return description;
     }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Integer getDifficulty() {
+        return difficulty;
+    }
+
+    public void setDifficulty(Integer difficulty) {
+        this.difficulty = difficulty;
+    }
+
+    public Integer getSortOrder() {
+        return sortOrder;
+    }
+
+    public void setSortOrder(Integer sortOrder) {
+        this.sortOrder = sortOrder;
+    }
+
     public Long getSubCategoryId() {
         return subCategoryId;
+    }
+
+    public void setSubCategoryId(Long subCategoryId) {
+        this.subCategoryId = subCategoryId;
     }
 }

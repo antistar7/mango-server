@@ -5,12 +5,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-
+import org.springframework.web.server.ResponseStatusException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    private static final Logger log =
+            LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(ContentNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleContentNotFoundException(
@@ -60,12 +64,26 @@ public class GlobalExceptionHandler {
                 .body(response);
     }
 
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, Object>> handleResponseStatusException(
+            ResponseStatusException e) {
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("status", e.getStatusCode().value());
+        response.put("message", e.getReason());
+
+        return ResponseEntity
+                .status(e.getStatusCode())
+                .body(response);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleException(Exception e) {
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("status", 500);
         response.put("message", "서버 내부 오류가 발생했습니다.");
+        log.error("서버 내부 오류", e);
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)

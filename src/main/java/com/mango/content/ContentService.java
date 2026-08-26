@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
+//@Service
 public class ContentService {
 
     private final ContentRepository contentRepository;
@@ -47,9 +47,13 @@ public class ContentService {
         );
 
         Content content = new Content(
-                request.getKorean(),
-                request.getJapanese(),
+                request.getSourceLanguage(),
+                request.getTargetLanguage(),
+                request.getSourceText(),
+                request.getTargetText(),
                 request.getDescription(),
+                request.getDifficulty(),
+                request.getSortOrder(),
                 subCategory
         );
 
@@ -76,9 +80,13 @@ public class ContentService {
         );
 
         content.update(
-                request.getKorean(),
-                request.getJapanese(),
+                request.getSourceLanguage(),
+                request.getTargetLanguage(),
+                request.getSourceText(),
+                request.getTargetText(),
                 request.getDescription(),
+                request.getDifficulty(),
+                request.getSortOrder(),
                 subCategory
         );
 
@@ -99,17 +107,33 @@ public class ContentService {
 
         SubCategory subCategory = content.getSubCategory();
 
+        List<ContentExampleResponse> examples =
+                content.getExamples()
+                        .stream()
+                        .map(example -> new ContentExampleResponse(
+                                example.getId(),
+                                example.getSpeaker(),
+                                example.getSourceText(),
+                                example.getTargetText(),
+                                example.getSortOrder()
+                        ))
+                        .toList();
+
         return new ContentResponse(
                 content.getId(),
-                content.getKorean(),
-                content.getJapanese(),
+                content.getSourceLanguage(),
+                content.getTargetLanguage(),
+                content.getSourceText(),
+                content.getTargetText(),
                 content.getDescription(),
 
                 subCategory.getCategory().getId(),
                 subCategory.getCategory().getName(),
 
                 subCategory.getId(),
-                subCategory.getName()
+                subCategory.getName(),
+
+                examples
         );
     }
 }
