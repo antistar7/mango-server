@@ -8,6 +8,7 @@ public record CityAdminResponse(
         String name,
         String nameJa,
         String description,
+        String heroImage,
         Boolean active,
         Integer sortOrder,
         LocalDateTime createdAt,

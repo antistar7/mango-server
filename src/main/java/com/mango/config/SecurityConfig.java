@@ -1,10 +1,13 @@
 package com.mango.config;
 
+import com.mango.fukuoka.member.MemberBearerFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -15,6 +18,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.util.StringUtils;
 
 @Configuration
@@ -35,12 +39,30 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(
-            HttpSecurity http
+            HttpSecurity http,
+            @Lazy MemberBearerFilter memberBearerFilter
     ) throws Exception {
         return http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(PROTECTED_PATHS).authenticated()
+                        .requestMatchers(PROTECTED_PATHS).hasRole("ADMIN")
+                        .requestMatchers("/api/v1/me/**").hasRole("MEMBER")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/logout")
+                        .hasRole("MEMBER")
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/v1/contents/*/comments"
+                        )
+                        .hasRole("MEMBER")
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/v1/comments/*"
+                        )
+                        .hasRole("MEMBER")
                         .anyRequest().permitAll()
+                )
+                .addFilterBefore(
+                        memberBearerFilter,
+                        UsernamePasswordAuthenticationFilter.class
                 )
                 /*
                  * SPA가 직접 401을 받아 로그인 화면을 띄우도록,

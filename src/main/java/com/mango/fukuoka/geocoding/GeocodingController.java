@@ -17,11 +17,15 @@ public class GeocodingController {
     @GetMapping
     public GeocodingService.GeocodingResponse search(
             @RequestParam(required = false) String placeName,
-            @RequestParam(required = false) String address
+            @RequestParam(required = false) String address,
+            @RequestParam(required = false) String citySlug,
+            @RequestParam(required = false) String cityName
     ) {
         return geocodingService.search(
                 placeName,
-                address
+                address,
+                citySlug,
+                cityName
         );
     }
 }

@@ -24,12 +24,14 @@ public class GeocodingService {
 
     public GeocodingResponse search(
             String placeName,
-            String address
+            String address,
+            String citySlug,
+            String cityName
     ) {
-        String query = buildQuery(placeName, address);
+        String query = buildQuery(placeName, address, citySlug, cityName);
 
         try {
-            JsonNode results = searchNominatim(query);
+            JsonNode results = searchNominatim(query, citySlug, cityName);
 
             JsonNode best = findBestResult(results);
 
@@ -60,6 +62,9 @@ public class GeocodingService {
                     e
             );
 
+        } catch (IllegalArgumentException e) {
+            throw e;
+
         } catch (Exception e) {
             throw new IllegalStateException(
                     "주소 좌표 검색에 실패했습니다.",
@@ -68,26 +73,38 @@ public class GeocodingService {
         }
     }
 
-    private JsonNode searchNominatim(String query)
-            throws Exception {
+    private JsonNode searchNominatim(
+            String query,
+            String citySlug,
+            String cityName
+    ) throws Exception {
 
         String encodedQuery = URLEncoder.encode(
                 query,
                 StandardCharsets.UTF_8
         );
 
-        String url =
+        StringBuilder url = new StringBuilder(
                 "https://nominatim.openstreetmap.org/search"
                         + "?q=" + encodedQuery
                         + "&format=jsonv2"
                         + "&limit=10"
                         + "&countrycodes=jp"
-                        + "&viewbox=130.35,33.65,130.45,33.55"
-                        + "&bounded=1"
-                        + "&accept-language=ja";
+                        + "&accept-language=ja"
+        );
+
+        /*
+         * 좌표 검색도 도시별로 가둔다.
+         * 후쿠오카 viewbox에 오사카를 넣으면 난바가 후쿠오카 좌표로 나온다.
+         */
+        String viewbox = viewboxFor(citySlug, cityName);
+        if (viewbox != null) {
+            url.append("&viewbox=").append(viewbox);
+            url.append("&bounded=1");
+        }
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
+                .uri(URI.create(url.toString()))
                 .header(
                         "User-Agent",
                         "MANGO/1.0 (https://mango-love.com)"
@@ -141,9 +158,6 @@ public class GeocodingService {
             return null;
         }
 
-        /*
-         * 1. 지역 자체를 나타내는 결과를 최우선
-         */
         String[] preferredAddressTypes = {
                 "quarter",
                 "neighbourhood",
@@ -163,42 +177,20 @@ public class GeocodingService {
             }
         }
 
-        /*
-         * 2. 공원 등 명확한 장소 자체
-         */
         for (JsonNode result : results) {
             if ("park".equals(result.path("type").asText())) {
                 return result;
             }
         }
 
-        /*
-         * 3. 지역 타입이 없는 경우
-         *    Nominatim의 첫 번째 검색 결과를 사용
-         */
         return results.get(0);
     }
 
-    private java.util.List<String> extractPlaceTokens(JsonNode result) {
-
-        java.util.List<String> tokens =
-                new java.util.ArrayList<>();
-
-        JsonNode address = result.path("address");
-
-        if (address.isObject()) {
-            address.fields().forEachRemaining(entry -> {
-                if (entry.getValue().isTextual()) {
-                    tokens.add(entry.getValue().asText());
-                }
-            });
-        }
-
-        return tokens;
-    }
     private String buildQuery(
             String placeName,
-            String address
+            String address,
+            String citySlug,
+            String cityName
     ) {
         StringBuilder query = new StringBuilder();
 
@@ -218,9 +210,77 @@ public class GeocodingService {
             query.append(", ");
         }
 
-        query.append("福岡市, 福岡県, 日本");
+        query.append(citySuffix(citySlug, cityName));
 
         return query.toString();
+    }
+
+    private static String citySuffix(String citySlug, String cityName) {
+        if (isFukuoka(citySlug, cityName)) {
+            return "福岡市, 福岡県, 日本";
+        }
+
+        if (isOsaka(citySlug, cityName)) {
+            return "大阪市, 大阪府, 日本";
+        }
+
+        if (cityName != null && !cityName.isBlank()) {
+            return cityName.trim() + ", 日本";
+        }
+
+        return "日本";
+    }
+
+    private static String viewboxFor(String citySlug, String cityName) {
+        if (isFukuoka(citySlug, cityName)) {
+            return "130.35,33.65,130.45,33.55";
+        }
+
+        if (isOsaka(citySlug, cityName)) {
+            return "135.43,34.75,135.58,34.60";
+        }
+
+        return null;
+    }
+
+    private static boolean isFukuoka(String citySlug, String cityName) {
+        return containsAny(
+                citySlug,
+                cityName,
+                "fukuoka",
+                "福岡",
+                "후쿠오카"
+        );
+    }
+
+    private static boolean isOsaka(String citySlug, String cityName) {
+        return containsAny(
+                citySlug,
+                cityName,
+                "osaka",
+                "大阪",
+                "오사카"
+        );
+    }
+
+    private static boolean containsAny(
+            String citySlug,
+            String cityName,
+            String... tokens
+    ) {
+        String haystack = (
+                (citySlug == null ? "" : citySlug)
+                        + " "
+                        + (cityName == null ? "" : cityName)
+        ).toLowerCase();
+
+        for (String token : tokens) {
+            if (haystack.contains(token.toLowerCase())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public record GeocodingResponse(

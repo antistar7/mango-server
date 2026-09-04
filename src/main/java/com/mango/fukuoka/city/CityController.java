@@ -45,7 +45,8 @@ public class CityController {
                         city.getSlug(),
                         city.getName(),
                         city.getNameJa(),
-                        city.getDescription()
+                        city.getDescription(),
+                        city.getHeroImage()
                 ))
                 .toList();
     }
@@ -160,7 +161,8 @@ public class CityController {
             String slug,
             String name,
             String nameJa,
-            String description
+            String description,
+            String heroImage
     ) {
     }
 

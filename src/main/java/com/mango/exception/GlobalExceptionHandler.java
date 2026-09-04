@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -75,6 +76,22 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(e.getStatusCode())
+                .body(response);
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<Map<String, Object>> handleMissingServletRequestPartException(
+            MissingServletRequestPartException e) {
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("status", 400);
+        response.put(
+                "message",
+                "업로드할 파일이 전달되지 않았습니다. 이미지를 다시 선택해주세요."
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
                 .body(response);
     }
 

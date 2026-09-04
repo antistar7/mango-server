@@ -23,6 +23,9 @@ public class City {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "hero_image", length = 500)
+    private String heroImage;
+
     @Column(nullable = false)
     private Boolean active;
 
@@ -43,6 +46,7 @@ public class City {
             String name,
             String nameJa,
             String description,
+            String heroImage,
             Boolean active,
             Integer sortOrder
     ) {
@@ -52,6 +56,7 @@ public class City {
         city.name = name;
         city.nameJa = nameJa;
         city.description = description;
+        city.heroImage = heroImage;
         city.active = active;
         city.sortOrder = sortOrder;
 
@@ -67,6 +72,7 @@ public class City {
             String name,
             String nameJa,
             String description,
+            String heroImage,
             Boolean active,
             Integer sortOrder
     ) {
@@ -74,6 +80,7 @@ public class City {
         this.name = name;
         this.nameJa = nameJa;
         this.description = description;
+        this.heroImage = heroImage;
         this.active = active;
         this.sortOrder = sortOrder;
         this.updatedAt = LocalDateTime.now();
@@ -97,6 +104,10 @@ public class City {
 
     public String getDescription() {
         return description;
+    }
+
+    public String getHeroImage() {
+        return heroImage;
     }
 
     public Boolean getActive() {

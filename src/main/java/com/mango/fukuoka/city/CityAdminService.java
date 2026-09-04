@@ -65,6 +65,7 @@ public class CityAdminService {
                 require(request.name(), "도시명을 입력해주세요."),
                 request.nameJa(),
                 request.description(),
+                request.heroImage(),
                 request.active() != null && request.active(),
                 request.sortOrder() != null
                         ? request.sortOrder()
@@ -96,6 +97,7 @@ public class CityAdminService {
                 require(request.name(), "도시명을 입력해주세요."),
                 request.nameJa(),
                 request.description(),
+                request.heroImage(),
                 request.active() != null && request.active(),
                 request.sortOrder() != null
                         ? request.sortOrder()
@@ -172,6 +174,7 @@ public class CityAdminService {
                 city.getName(),
                 city.getNameJa(),
                 city.getDescription(),
+                city.getHeroImage(),
                 city.getActive(),
                 city.getSortOrder(),
                 city.getCreatedAt(),
