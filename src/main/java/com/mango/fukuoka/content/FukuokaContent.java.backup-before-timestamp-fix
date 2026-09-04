@@ -67,18 +67,6 @@ public class FukuokaContent {
     protected FukuokaContent() {
     }
 
-    @PrePersist
-    protected void onCreate() {
-        LocalDateTime now = LocalDateTime.now();
-        createdAt = now;
-        updatedAt = now;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
-
     public List<FukuokaCategory> getCategories() {
         return categories;
     }
@@ -142,7 +130,6 @@ public class FukuokaContent {
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
-
 
     public void update(
             String title,

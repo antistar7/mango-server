@@ -34,10 +34,7 @@ public class FukuokaController {
     }
 
     @GetMapping("/contents")
-    @Transactional(
-            transactionManager = "fukuokaTransactionManager",
-            readOnly = true
-    )
+    @Transactional(readOnly = true)
     public List<FukuokaContentResponse> contents() {
 
         return contentRepository
@@ -67,6 +64,8 @@ public class FukuokaController {
                         content.getStatus(),
                         content.getPublishedAt(),
                         content.getMapVisible(),
+                        content.getMangoPick(),
+                        content.getMangoPickOrder(),
 
                         content.getCategories()
                                 .stream()
@@ -130,6 +129,8 @@ public class FukuokaController {
                 content.getStatus(),
                 content.getPublishedAt(),
                 content.getMapVisible(),
+                content.getMangoPick(),
+                content.getMangoPickOrder(),
 
                 content.getCategories()
                         .stream()
@@ -204,6 +205,8 @@ public class FukuokaController {
             String status,
             java.time.LocalDateTime publishedAt,
             Boolean mapVisible,
+            Boolean isMangoPick,
+            Integer mangoPickOrder,
             List<FukuokaCategoryResponse> categories
     ) {
     }

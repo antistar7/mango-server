@@ -1,4 +1,4 @@
-package com.mango.fukuoka.place;
+package com.mango.fukuoka.admin;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -6,24 +6,26 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/admin/cities/{citySlug}/places")
-public class PlaceAdminController {
+@RequestMapping("/api/v1/admin/cities/{citySlug}/contents")
+public class CityAdminContentController {
 
-    private final PlaceAdminService service;
+    private final CityAdminContentService service;
 
-    public PlaceAdminController(PlaceAdminService service) {
+    public CityAdminContentController(
+            CityAdminContentService service
+    ) {
         this.service = service;
     }
 
     @GetMapping
-    public List<PlaceAdminResponse> findAll(
+    public List<FukuokaContentResponse> findAll(
             @PathVariable String citySlug
     ) {
         return service.findAll(citySlug);
     }
 
     @GetMapping("/{id}")
-    public PlaceAdminResponse findById(
+    public FukuokaContentResponse findById(
             @PathVariable String citySlug,
             @PathVariable Long id
     ) {
@@ -32,18 +34,18 @@ public class PlaceAdminController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PlaceAdminResponse create(
+    public FukuokaContentResponse create(
             @PathVariable String citySlug,
-            @RequestBody PlaceAdminRequest request
+            @RequestBody FukuokaContentRequest request
     ) {
         return service.create(citySlug, request);
     }
 
     @PutMapping("/{id}")
-    public PlaceAdminResponse update(
+    public FukuokaContentResponse update(
             @PathVariable String citySlug,
             @PathVariable Long id,
-            @RequestBody PlaceAdminRequest request
+            @RequestBody FukuokaContentRequest request
     ) {
         return service.update(citySlug, id, request);
     }

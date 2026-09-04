@@ -11,6 +11,8 @@ import com.openai.models.responses.ResponseCreateParams;
 import com.openai.models.responses.StructuredResponseCreateParams;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class ContentGeneratorService {
@@ -20,6 +22,8 @@ public class ContentGeneratorService {
     private final OpenAIClient openAIClient;
     private final ContentRepository contentRepository;
     private final SubCategoryRepository subCategoryRepository;
+    private static final Logger log =
+            LoggerFactory.getLogger(ContentGeneratorService.class);
 
     public ContentGeneratorService(
             OpenAIClient openAIClient,
@@ -53,13 +57,10 @@ public class ContentGeneratorService {
 
             response = generateByAI(request);
 
-            System.out.println(
-                    "[콘텐츠 생성] "
-                            + attempt + "/"
-                            + MAX_GENERATION_ATTEMPTS
-                            + " sourceText=\""
-                            + response.sourceText
-                            + "\""
+            log.debug(
+                    "[콘텐츠 생성] {}/{} 생성 완료",
+                    attempt,
+                    MAX_GENERATION_ATTEMPTS
             );
 
             // 3. 중복 확인
@@ -72,15 +73,11 @@ public class ContentGeneratorService {
                             );
 
             if (!duplicated) {
-                System.out.println(
-                        "[콘텐츠 생성] 신규 콘텐츠 확인"
-                );
+                log.debug("[콘텐츠 생성] 신규 콘텐츠 확인");
                 break;
             }
 
-            System.out.println(
-                    "[콘텐츠 생성] 중복 콘텐츠 → 재생성"
-            );
+            log.debug("[콘텐츠 생성] 중복 콘텐츠 → 재생성");
 
             if (attempt == MAX_GENERATION_ATTEMPTS) {
                 throw new IllegalStateException(
@@ -132,12 +129,9 @@ public class ContentGeneratorService {
         // 7. Content + Examples 저장
         contentRepository.save(content);
 
-        System.out.println(
-                "[콘텐츠 생성] 저장 완료 contentId="
-                        + content.getId()
-                        + " sourceText=\""
-                        + response.sourceText
-                        + "\""
+        log.debug(
+                "[콘텐츠 생성] 저장 완료 contentId={}",
+                content.getId()
         );
 
         return response;

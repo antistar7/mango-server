@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import com.mango.fukuoka.city.City;
 
 @Entity
 @Table(name = "place")
@@ -12,6 +13,10 @@ public class FukuokaPlace {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "city_id")
+    private City city;
 
     @Column(nullable = false, length = 100)
     private String name;
@@ -46,8 +51,65 @@ public class FukuokaPlace {
     protected FukuokaPlace() {
     }
 
+    public static FukuokaPlace create(
+            City city,
+            String name,
+            String nameJa,
+            String slug,
+            String description,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            String address,
+            String thumbnailImage
+    ) {
+        FukuokaPlace place = new FukuokaPlace();
+
+        place.city = city;
+        place.name = name;
+        place.nameJa = nameJa;
+        place.slug = slug;
+        place.description = description;
+        place.latitude = latitude;
+        place.longitude = longitude;
+        place.address = address;
+        place.thumbnailImage = thumbnailImage;
+
+        LocalDateTime now = LocalDateTime.now();
+        place.createdAt = now;
+        place.updatedAt = now;
+
+        return place;
+    }
+
+    public void update(
+            City city,
+            String name,
+            String nameJa,
+            String slug,
+            String description,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            String address,
+            String thumbnailImage
+    ) {
+        this.city = city;
+        this.name = name;
+        this.nameJa = nameJa;
+        this.slug = slug;
+        this.description = description;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.address = address;
+        this.thumbnailImage = thumbnailImage;
+        this.updatedAt = LocalDateTime.now();
+    }
+
     public Long getId() {
         return id;
+    }
+
+    public City getCity() {
+        return city;
     }
 
     public String getName() {

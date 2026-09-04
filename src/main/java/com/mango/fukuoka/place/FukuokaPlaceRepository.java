@@ -11,4 +11,6 @@ public interface FukuokaPlaceRepository
     Optional<FukuokaPlace> findBySlug(String slug);
 
     List<FukuokaPlace> findAllByOrderByNameAsc();
+
+    List<FukuokaPlace> findByCity_SlugOrderByNameAsc(String citySlug);
 }
