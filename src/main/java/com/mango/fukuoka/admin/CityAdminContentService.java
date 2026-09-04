@@ -5,7 +5,12 @@ import com.mango.fukuoka.category.FukuokaCategoryRepository;
 import com.mango.fukuoka.city.City;
 import com.mango.fukuoka.city.CityRepository;
 import com.mango.fukuoka.content.FukuokaContent;
+import com.mango.fukuoka.content.FukuokaContentAssociations;
 import com.mango.fukuoka.content.FukuokaContentRepository;
+import com.mango.fukuoka.content.expression.JapaneseExpressionRepository;
+import com.mango.fukuoka.content.expression.JapaneseExpressionResponse;
+import com.mango.fukuoka.content.image.FukuokaContentImageRepository;
+import com.mango.fukuoka.content.image.FukuokaContentImageResponse;
 import com.mango.fukuoka.place.FukuokaPlace;
 import com.mango.fukuoka.place.FukuokaPlaceRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional(
@@ -25,17 +31,26 @@ public class CityAdminContentService {
     private final FukuokaContentRepository contentRepository;
     private final FukuokaPlaceRepository placeRepository;
     private final FukuokaCategoryRepository categoryRepository;
+    private final JapaneseExpressionRepository expressionRepository;
+    private final FukuokaContentImageRepository imageRepository;
+    private final FukuokaContentAssociations contentAssociations;
 
     public CityAdminContentService(
             CityRepository cityRepository,
             FukuokaContentRepository contentRepository,
             FukuokaPlaceRepository placeRepository,
-            FukuokaCategoryRepository categoryRepository
+            FukuokaCategoryRepository categoryRepository,
+            JapaneseExpressionRepository expressionRepository,
+            FukuokaContentImageRepository imageRepository,
+            FukuokaContentAssociations contentAssociations
     ) {
         this.cityRepository = cityRepository;
         this.contentRepository = contentRepository;
         this.placeRepository = placeRepository;
         this.categoryRepository = categoryRepository;
+        this.expressionRepository = expressionRepository;
+        this.imageRepository = imageRepository;
+        this.contentAssociations = contentAssociations;
     }
 
     public List<FukuokaContentResponse> findAll(
@@ -43,10 +58,26 @@ public class CityAdminContentService {
     ) {
         verifyCity(citySlug);
 
-        return contentRepository
-                .findByPlace_City_SlugOrderByUpdatedAtDesc(citySlug)
-                .stream()
-                .map(this::toResponse)
+        List<FukuokaContent> contents = contentRepository
+                .findByPlace_City_SlugOrderByUpdatedAtDesc(citySlug);
+
+        Map<Long, List<JapaneseExpressionResponse>> expressions =
+                contentAssociations.expressionsByContentId(contents);
+        Map<Long, List<FukuokaContentImageResponse>> images =
+                contentAssociations.imagesByContentId(contents);
+
+        return contents.stream()
+                .map(content -> toResponse(
+                        content,
+                        expressions.getOrDefault(
+                                content.getId(),
+                                List.of()
+                        ),
+                        images.getOrDefault(
+                                content.getId(),
+                                List.of()
+                        )
+                ))
                 .toList();
     }
 
@@ -59,7 +90,11 @@ public class CityAdminContentService {
         FukuokaContent content = getContent(id);
         verifyContentCity(content, citySlug);
 
-        return toResponse(content);
+        return toResponse(
+                content,
+                contentAssociations.expressionsOf(content.getId()),
+                contentAssociations.imagesOf(content.getId())
+        );
     }
 
     public FukuokaContentResponse create(
@@ -94,8 +129,20 @@ public class CityAdminContentService {
                 categories
         );
 
+        FukuokaContent saved = contentRepository.save(content);
+
         return toResponse(
-                contentRepository.save(content)
+                saved,
+                ContentExpressionWriter.replace(
+                        expressionRepository,
+                        saved,
+                        request.expressions()
+                ),
+                ContentImageWriter.replace(
+                        imageRepository,
+                        saved,
+                        request.images()
+                )
         );
     }
 
@@ -135,7 +182,19 @@ public class CityAdminContentService {
                 categories
         );
 
-        return toResponse(content);
+        return toResponse(
+                content,
+                ContentExpressionWriter.replace(
+                        expressionRepository,
+                        content,
+                        request.expressions()
+                ),
+                ContentImageWriter.replace(
+                        imageRepository,
+                        content,
+                        request.images()
+                )
+        );
     }
 
     public void delete(
@@ -272,7 +331,9 @@ public class CityAdminContentService {
     }
 
     private FukuokaContentResponse toResponse(
-            FukuokaContent content
+            FukuokaContent content,
+            List<JapaneseExpressionResponse> expressions,
+            List<FukuokaContentImageResponse> images
     ) {
         return new FukuokaContentResponse(
                 content.getId(),
@@ -304,7 +365,10 @@ public class CityAdminContentService {
                 content.getCategories()
                         .stream()
                         .map(FukuokaCategory::getId)
-                        .toList()
+                        .toList(),
+
+                expressions,
+                images
         );
     }
 }

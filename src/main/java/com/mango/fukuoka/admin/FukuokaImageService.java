@@ -103,8 +103,12 @@ public class FukuokaImageService {
             return "thumbnail";
         }
 
+        if ("story".equalsIgnoreCase(imageType)) {
+            return "story";
+        }
+
         throw new IllegalArgumentException(
-                "imageType은 hero 또는 thumbnail이어야 합니다."
+                "imageType은 hero, thumbnail 또는 story여야 합니다."
         );
     }
 

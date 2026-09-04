@@ -5,6 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.autoconfigure.DataSourceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -46,8 +47,12 @@ public class JpaConfig {
         return properties.initializeDataSourceBuilder().build();
     }
 
+    /**
+     * ddl-auto=validate로 스키마를 검증하므로 Flyway 마이그레이션이 먼저 끝나야 한다.
+     */
     @Primary
     @Bean
+    @DependsOn("mangoFlyway")
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(
             @Qualifier("dataSource")
             DataSource dataSource

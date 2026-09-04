@@ -1,8 +1,10 @@
 package com.mango.fukuoka.city;
 
 import com.mango.fukuoka.content.FukuokaContent;
+import com.mango.fukuoka.content.FukuokaContentAssociations;
 import com.mango.fukuoka.content.FukuokaContentRepository;
-import com.mango.fukuoka.place.FukuokaPlace;
+import com.mango.fukuoka.content.expression.JapaneseExpressionResponse;
+import com.mango.fukuoka.content.image.FukuokaContentImageResponse;
 import com.mango.fukuoka.place.FukuokaPlaceRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/cities")
@@ -18,15 +21,18 @@ public class CityController {
     private final CityRepository cityRepository;
     private final FukuokaPlaceRepository placeRepository;
     private final FukuokaContentRepository contentRepository;
+    private final FukuokaContentAssociations contentAssociations;
 
     public CityController(
             CityRepository cityRepository,
             FukuokaPlaceRepository placeRepository,
-            FukuokaContentRepository contentRepository
+            FukuokaContentRepository contentRepository,
+            FukuokaContentAssociations contentAssociations
     ) {
         this.cityRepository = cityRepository;
         this.placeRepository = placeRepository;
         this.contentRepository = contentRepository;
+        this.contentAssociations = contentAssociations;
     }
 
     @GetMapping
@@ -81,12 +87,19 @@ public class CityController {
     ) {
         verifyCity(citySlug);
 
-        return contentRepository
+        List<FukuokaContent> contents = contentRepository
                 .findByPlace_City_SlugAndStatusOrderByPublishedAtDesc(
                         citySlug,
                         "PUBLISHED"
-                )
-                .stream()
+                );
+
+        Map<Long, List<FukuokaContentImageResponse>> images =
+                contentAssociations.imagesByContentId(contents);
+
+        Map<Long, List<JapaneseExpressionResponse>> expressions =
+                contentAssociations.expressionsByContentId(contents);
+
+        return contents.stream()
                 .map(content -> new ContentResponse(
                         content.getId(),
                         content.getTitle(),
@@ -108,7 +121,25 @@ public class CityController {
                         content.getPublishedAt(),
                         content.getMapVisible(),
                         content.getMangoPick(),
-                        content.getMangoPickOrder()
+                        content.getMangoPickOrder(),
+                        content.getCategories()
+                                .stream()
+                                .map(category -> new CategoryResponse(
+                                        category.getId(),
+                                        category.getName(),
+                                        category.getNameJa(),
+                                        category.getSlug(),
+                                        category.getIcon()
+                                ))
+                                .toList(),
+                        images.getOrDefault(
+                                content.getId(),
+                                List.of()
+                        ),
+                        expressions.getOrDefault(
+                                content.getId(),
+                                List.of()
+                        )
                 ))
                 .toList();
     }
@@ -146,6 +177,15 @@ public class CityController {
     ) {
     }
 
+    public record CategoryResponse(
+            Long id,
+            String name,
+            String nameJa,
+            String slug,
+            String icon
+    ) {
+    }
+
     public record ContentResponse(
             Long id,
             String title,
@@ -161,7 +201,10 @@ public class CityController {
             java.time.LocalDateTime publishedAt,
             Boolean mapVisible,
             Boolean isMangoPick,
-            Integer mangoPickOrder
+            Integer mangoPickOrder,
+            List<CategoryResponse> categories,
+            List<FukuokaContentImageResponse> images,
+            List<JapaneseExpressionResponse> expressions
     ) {
     }
 }

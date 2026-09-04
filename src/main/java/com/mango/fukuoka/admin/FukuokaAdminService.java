@@ -3,44 +3,83 @@ package com.mango.fukuoka.admin;
 import com.mango.fukuoka.category.FukuokaCategory;
 import com.mango.fukuoka.category.FukuokaCategoryRepository;
 import com.mango.fukuoka.content.FukuokaContent;
+import com.mango.fukuoka.content.FukuokaContentAssociations;
 import com.mango.fukuoka.content.FukuokaContentRepository;
+import com.mango.fukuoka.content.expression.JapaneseExpressionRepository;
+import com.mango.fukuoka.content.expression.JapaneseExpressionResponse;
+import com.mango.fukuoka.content.image.FukuokaContentImageRepository;
+import com.mango.fukuoka.content.image.FukuokaContentImageResponse;
 import com.mango.fukuoka.place.FukuokaPlace;
 import com.mango.fukuoka.place.FukuokaPlaceRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
-@Transactional
+@Transactional(
+        transactionManager = "fukuokaTransactionManager"
+)
 public class FukuokaAdminService {
 
     private final FukuokaContentRepository contentRepository;
     private final FukuokaPlaceRepository placeRepository;
     private final FukuokaCategoryRepository categoryRepository;
+    private final JapaneseExpressionRepository expressionRepository;
+    private final FukuokaContentImageRepository imageRepository;
+    private final FukuokaContentAssociations contentAssociations;
 
     public FukuokaAdminService(
             FukuokaContentRepository contentRepository,
             FukuokaPlaceRepository placeRepository,
-            FukuokaCategoryRepository categoryRepository
+            FukuokaCategoryRepository categoryRepository,
+            JapaneseExpressionRepository expressionRepository,
+            FukuokaContentImageRepository imageRepository,
+            FukuokaContentAssociations contentAssociations
     ) {
         this.contentRepository = contentRepository;
         this.placeRepository = placeRepository;
         this.categoryRepository = categoryRepository;
+        this.expressionRepository = expressionRepository;
+        this.imageRepository = imageRepository;
+        this.contentAssociations = contentAssociations;
     }
 
     public List<FukuokaContentResponse> findAll() {
-        return contentRepository
-                .findAllByOrderByUpdatedAtDesc()
-                .stream()
-                .map(this::toResponse)
+        List<FukuokaContent> contents =
+                contentRepository.findAllByOrderByUpdatedAtDesc();
+
+        Map<Long, List<JapaneseExpressionResponse>> expressions =
+                contentAssociations.expressionsByContentId(contents);
+        Map<Long, List<FukuokaContentImageResponse>> images =
+                contentAssociations.imagesByContentId(contents);
+
+        return contents.stream()
+                .map(content -> toResponse(
+                        content,
+                        expressions.getOrDefault(
+                                content.getId(),
+                                List.of()
+                        ),
+                        images.getOrDefault(
+                                content.getId(),
+                                List.of()
+                        )
+                ))
                 .toList();
     }
 
     public FukuokaContentResponse findById(Long id) {
-        return toResponse(getContent(id));
+        FukuokaContent content = getContent(id);
+
+        return toResponse(
+                content,
+                contentAssociations.expressionsOf(content.getId()),
+                contentAssociations.imagesOf(content.getId())
+        );
     }
 
     public FukuokaContentResponse create(
@@ -69,8 +108,20 @@ public class FukuokaAdminService {
                 categories
         );
 
+        FukuokaContent saved = contentRepository.save(content);
+
         return toResponse(
-                contentRepository.save(content)
+                saved,
+                ContentExpressionWriter.replace(
+                        expressionRepository,
+                        saved,
+                        request.expressions()
+                ),
+                ContentImageWriter.replace(
+                        imageRepository,
+                        saved,
+                        request.images()
+                )
         );
     }
 
@@ -103,7 +154,19 @@ public class FukuokaAdminService {
                 categories
         );
 
-        return toResponse(content);
+        return toResponse(
+                content,
+                ContentExpressionWriter.replace(
+                        expressionRepository,
+                        content,
+                        request.expressions()
+                ),
+                ContentImageWriter.replace(
+                        imageRepository,
+                        content,
+                        request.images()
+                )
+        );
     }
 
     public void delete(Long id) {
@@ -174,7 +237,9 @@ public class FukuokaAdminService {
     }
 
     private FukuokaContentResponse toResponse(
-            FukuokaContent content
+            FukuokaContent content,
+            List<JapaneseExpressionResponse> expressions,
+            List<FukuokaContentImageResponse> images
     ) {
         return new FukuokaContentResponse(
                 content.getId(),
@@ -206,7 +271,10 @@ public class FukuokaAdminService {
                 content.getCategories()
                         .stream()
                         .map(FukuokaCategory::getId)
-                        .toList()
+                        .toList(),
+
+                expressions,
+                images
         );
     }
 }

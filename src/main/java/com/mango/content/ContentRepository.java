@@ -17,6 +17,20 @@ public interface ContentRepository
     @EntityGraph(attributePaths = {"examples"})
     java.util.Optional<Content> findById(Long id);
 
+    /**
+     * 학습 화면용 조회. 카테고리 라벨과 예문까지 한 번에 읽어
+     * 영속성 컨텍스트를 벗어난 뒤에도 매핑할 수 있게 한다.
+     */
+    @Query("""
+            SELECT DISTINCT c
+            FROM Content c
+            JOIN FETCH c.subCategory sc
+            JOIN FETCH sc.category
+            LEFT JOIN FETCH c.examples
+            ORDER BY c.sortOrder ASC, c.id ASC
+            """)
+    List<Content> findAllForStudy();
+
     @Query("""
             SELECT COALESCE(MAX(c.sortOrder), 0)
             FROM Content c

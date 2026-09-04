@@ -53,4 +53,22 @@ public class FukuokaContentImage {
     public String getCaption() {
         return caption;
     }
+
+    public static FukuokaContentImage create(
+            FukuokaContent content,
+            String imageUrl,
+            String imageType,
+            Integer sortOrder,
+            String caption
+    ) {
+        FukuokaContentImage created = new FukuokaContentImage();
+
+        created.content = content;
+        created.imageUrl = imageUrl;
+        created.imageType = imageType;
+        created.sortOrder = sortOrder != null ? sortOrder : 0;
+        created.caption = caption;
+
+        return created;
+    }
 }

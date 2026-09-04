@@ -1,5 +1,8 @@
 package com.mango.fukuoka.admin;
 
+import com.mango.fukuoka.content.expression.JapaneseExpressionResponse;
+import com.mango.fukuoka.content.image.FukuokaContentImageResponse;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,6 +22,8 @@ public record FukuokaContentResponse(
         Boolean mapVisible,
         Boolean isMangoPick,
         Integer mangoPickOrder,
-        List<Long> categoryIds
+        List<Long> categoryIds,
+        List<JapaneseExpressionResponse> expressions,
+        List<FukuokaContentImageResponse> images
 ) {
 }

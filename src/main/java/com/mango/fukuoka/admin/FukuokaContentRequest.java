@@ -16,6 +16,8 @@ public record FukuokaContentRequest(
         Boolean mapVisible,
         Boolean isMangoPick,
         Integer mangoPickOrder,
-        List<Long> categoryIds
+        List<Long> categoryIds,
+        List<FukuokaExpressionRequest> expressions,
+        List<FukuokaImageRequest> images
 ) {
 }

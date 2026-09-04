@@ -7,11 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = {
-        "http://localhost:5173",
-        "http://161.34.67.76",
-        "https://mango-love.com"
-})
 @RequestMapping("/api/v1/study-histories")
 public class StudyHistoryController {
 
