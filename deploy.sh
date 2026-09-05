@@ -34,6 +34,7 @@ echo "==> Installing..."
 ssh "$REMOTE" "
     mv '$REMOTE_TMP' '$REMOTE_APP'
     chown mango:mango '$REMOTE_APP'
+    mkdir -p /home/mango/app/logs
 "
 
 echo "==> Deploy complete"
