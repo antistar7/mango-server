@@ -115,6 +115,9 @@ public class CityAdminContentService {
                 request.summary(),
                 request.body(),
                 place,
+                request.storeLatitude(),
+                request.storeLongitude(),
+                request.storeAddress(),
                 request.thumbnailImage(),
                 request.heroImage(),
                 normalizeStatus(request.status()),
@@ -168,6 +171,9 @@ public class CityAdminContentService {
                 request.summary(),
                 request.body(),
                 place,
+                request.storeLatitude(),
+                request.storeLongitude(),
+                request.storeAddress(),
                 request.thumbnailImage(),
                 request.heroImage(),
                 normalizeStatus(request.status()),
@@ -353,6 +359,10 @@ public class CityAdminContentService {
                 content.getPlace() != null
                         ? content.getPlace().getNameJa()
                         : null,
+
+                content.getStoreLatitude(),
+                content.getStoreLongitude(),
+                content.getStoreAddress(),
 
                 content.getThumbnailImage(),
                 content.getHeroImage(),

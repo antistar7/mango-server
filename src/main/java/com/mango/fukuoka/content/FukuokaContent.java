@@ -3,6 +3,7 @@ package com.mango.fukuoka.content;
 import com.mango.fukuoka.category.FukuokaCategory;
 import com.mango.fukuoka.place.FukuokaPlace;
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDateTime;
@@ -30,6 +31,16 @@ public class FukuokaContent {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "place_id")
     private FukuokaPlace place;
+
+    @Column(name = "store_latitude", precision = 10, scale = 7)
+    private BigDecimal storeLatitude;
+
+    @Column(name = "store_longitude", precision = 10, scale = 7)
+    private BigDecimal storeLongitude;
+
+    @Column(name = "store_address", length = 255)
+    private String storeAddress;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "content_category",
@@ -107,6 +118,18 @@ public class FukuokaContent {
         return place;
     }
 
+    public BigDecimal getStoreLatitude() {
+        return storeLatitude;
+    }
+
+    public BigDecimal getStoreLongitude() {
+        return storeLongitude;
+    }
+
+    public String getStoreAddress() {
+        return storeAddress;
+    }
+
     public String getThumbnailImage() {
         return thumbnailImage;
     }
@@ -150,6 +173,9 @@ public class FukuokaContent {
             String summary,
             String body,
             FukuokaPlace place,
+            BigDecimal storeLatitude,
+            BigDecimal storeLongitude,
+            String storeAddress,
             String thumbnailImage,
             String heroImage,
             String status,
@@ -164,6 +190,9 @@ public class FukuokaContent {
         this.summary = summary;
         this.body = body;
         this.place = place;
+        this.storeLatitude = storeLatitude;
+        this.storeLongitude = storeLongitude;
+        this.storeAddress = storeAddress;
         this.thumbnailImage = thumbnailImage;
         this.heroImage = heroImage;
         this.status = status;
@@ -182,6 +211,9 @@ public class FukuokaContent {
             String summary,
             String body,
             FukuokaPlace place,
+            BigDecimal storeLatitude,
+            BigDecimal storeLongitude,
+            String storeAddress,
             String thumbnailImage,
             String heroImage,
             String status,
@@ -198,6 +230,9 @@ public class FukuokaContent {
         content.summary = summary;
         content.body = body;
         content.place = place;
+        content.storeLatitude = storeLatitude;
+        content.storeLongitude = storeLongitude;
+        content.storeAddress = storeAddress;
         content.thumbnailImage = thumbnailImage;
         content.heroImage = heroImage;
         content.status = status;

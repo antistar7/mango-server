@@ -149,6 +149,10 @@ public class FukuokaController {
                         ? content.getPlace().getNameJa()
                         : null,
 
+                content.getStoreLatitude(),
+                content.getStoreLongitude(),
+                content.getStoreAddress(),
+
                 content.getThumbnailImage(),
                 content.getHeroImage(),
                 content.getStatus(),
@@ -199,6 +203,9 @@ public class FukuokaController {
             Long placeId,
             String placeName,
             String placeNameJa,
+            java.math.BigDecimal storeLatitude,
+            java.math.BigDecimal storeLongitude,
+            String storeAddress,
             String thumbnailImage,
             String heroImage,
             String status,
